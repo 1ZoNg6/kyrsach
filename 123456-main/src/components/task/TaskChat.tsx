@@ -66,14 +66,12 @@ export default function TaskChat({ taskId, assigneeId, creatorId }: TaskChatProp
             const uniqueIds = [...new Set(participantIds.filter(Boolean))]; // Filter out null/undefined
 
             if (uniqueIds.length > 0) {
-                const { data, error } = await supabase
+                const { error } = await supabase
                     .from('profiles')
                     .select('*')
                     .in('id', uniqueIds);
 
                 if (error) throw error;
-                // Используем participants для отображения или логики, если нужно
-                setParticipants(data || []);
             }
         } catch (err) {
             console.error('Error fetching participants:', err);

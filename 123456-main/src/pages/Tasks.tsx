@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import { Plus, Filter, SortAsc, SortDesc, Search } from 'lucide-react';
 import { TaskCard } from '../components/TaskCard';
 import { CreateTaskModal } from '../components/task/CreateTaskModal';
-import { TaskDetailsModal } from '../components/task/CreateTaskModal.tsx';
+import { TaskDetailsModal } from '../components/task/TaskDetailsModal.tsx';
 import type { Task } from '../types/database';
 
 export default function Tasks() {

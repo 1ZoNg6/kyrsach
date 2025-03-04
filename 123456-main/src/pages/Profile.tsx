@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { supabase } from '../lib/supabase';
-import { User, Settings, Upload, Camera, X } from 'lucide-react';
+import { User, Settings,  Camera, X } from 'lucide-react';
 
 export default function Profile() {
     const { user, loadUser, updateProfile } = useAuthStore();
