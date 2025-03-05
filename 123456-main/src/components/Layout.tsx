@@ -1,10 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { LayoutDashboard, CheckSquare, LogOut, User, MessageSquare, Bell } from 'lucide-react';
+import { useAppSettingsStore } from '../store/AppSettingStore.ts';
+import {
+    LayoutDashboard,
+    CheckSquare,
+    LogOut,
+    MessageSquare,
+    Users
+} from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import ThemeToggle from './ui/ThemeToggle';
 import ProfileDropdown from './ui/ProfileDropdown';
+import NotificationsDropdown from './ui/NotificationsDropdown';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -12,6 +20,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
     const { user, signOut } = useAuthStore();
+    const { appName } = useAppSettingsStore();
     const navigate = useNavigate();
     const location = useLocation();
     const [unreadNotifications, setUnreadNotifications] = useState(0);
@@ -62,11 +71,11 @@ export default function Layout({ children }: LayoutProps) {
                     event: '*',
                     schema: 'public',
                     table: 'notifications',
-                    filter: `user_id=eq.${user.id}`,
+                    filter: `user_id=eq.${user.id}`
                 },
                 () => {
                     fetchNotificationCount();
-                },
+                }
             )
             .subscribe();
 
@@ -79,11 +88,11 @@ export default function Layout({ children }: LayoutProps) {
                     event: '*',
                     schema: 'public',
                     table: 'messages',
-                    filter: `receiver_id=eq.${user.id}`,
+                    filter: `receiver_id=eq.${user.id}`
                 },
                 () => {
                     fetchMessageCount();
-                },
+                }
             )
             .subscribe();
 
@@ -102,6 +111,7 @@ export default function Layout({ children }: LayoutProps) {
         return location.pathname === path;
     };
 
+
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
             <nav className="bg-white dark:bg-gray-800 shadow-sm transition-colors duration-200">
@@ -110,7 +120,7 @@ export default function Layout({ children }: LayoutProps) {
                         <div className="flex">
                             <div className="flex-shrink-0 flex items-center">
                                 <Link to="/" className="text-xl font-bold text-gray-900 dark:text-white">
-                                    TaskManager
+                                    {appName}
                                 </Link>
                             </div>
                             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -153,29 +163,40 @@ export default function Layout({ children }: LayoutProps) {
                                     )}
                                 </Link>
                                 <Link
-                                    to="/profile"
+                                    to="/teams"
                                     className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
-                                        isActive('/profile')
+                                        isActive('/teams')
                                             ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
                                             : 'text-gray-900 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
                                     }`}
                                 >
-                                    <User className="mr-2 h-4 w-4" />
-                                    Profile
+                                    <Users className="mr-2 h-4 w-4" />
+                                    Teams
                                 </Link>
+                                {(user?.role === 'admin' || user?.role === 'manager') && (
+                                    <Link
+                                        to="/statistics"
+                                        className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
+                                            isActive('/statistics')
+                                                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                                                : 'text-gray-900 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                                        }`}
+                                    >
+                                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                                        Statistics
+                                    </Link>
+                                )}
                             </div>
                         </div>
                         <div className="flex items-center space-x-4">
                             <ThemeToggle />
-                            <button className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 relative">
-                                <Bell className="h-5 w-5" />
-                                {unreadNotifications > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                    {unreadNotifications > 9 ? '9+' : unreadNotifications}
-                  </span>
-                                )}
-                            </button>
+
+                            <NotificationsDropdown
+                                unreadCount={unreadNotifications}
+                            />
+
                             <ProfileDropdown />
+
                             <button
                                 onClick={handleSignOut}
                                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
@@ -184,6 +205,69 @@ export default function Layout({ children }: LayoutProps) {
                                 Sign out
                             </button>
                         </div>
+                    </div>
+                </div>
+
+                {/* Mobile menu */}
+                <div className="sm:hidden">
+                    <div className="pt-2 pb-3 space-y-1">
+                        <Link
+                            to="/"
+                            className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                                isActive('/')
+                                    ? 'border-blue-500 text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-300'
+                                    : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700'
+                            }`}
+                        >
+                            Dashboard
+                        </Link>
+                        <Link
+                            to="/tasks"
+                            className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                                isActive('/tasks')
+                                    ? 'border-blue-500 text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-300'
+                                    : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700'
+                            }`}
+                        >
+                            Tasks
+                        </Link>
+                        <Link
+                            to="/messages"
+                            className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                                isActive('/messages')
+                                    ? 'border-blue-500 text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-300'
+                                    : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700'
+                            }`}
+                        >
+                            Messages
+                            {unreadMessages > 0 && (
+                                <span className="ml-2 inline-block bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {unreadMessages > 9 ? '9+' : unreadMessages}
+                </span>
+                            )}
+                        </Link>
+                        <Link
+                            to="/teams"
+                            className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                                isActive('/teams')
+                                    ? 'border-blue-500 text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-300'
+                                    : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700'
+                            }`}
+                        >
+                            Teams
+                        </Link>
+                        {(user?.role === 'admin' || user?.role === 'manager') && (
+                            <Link
+                                to="/statistics"
+                                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                                    isActive('/statistics')
+                                        ? 'border-blue-500 text-blue-700 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-300'
+                                        : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700'
+                                }`}
+                            >
+                                Statistics
+                            </Link>
+                        )}
                     </div>
                 </div>
             </nav>

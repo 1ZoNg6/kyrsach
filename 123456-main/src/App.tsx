@@ -1,15 +1,20 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
+import { useAppSettingsStore } from './store/AppSettingStore.ts';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Tasks from './pages/Tasks';
 import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import Messages from './pages/Messages';
+import Teams from './pages/Teams';
+import Statistics from './pages/Statistics';
+import AdminPanel from './pages/AdminPanel';
 import Layout from './components/Layout';
 
-function PrivateRoute({ children }: { children: React.ReactNode }) {
+function PrivateRoute({ children, requiredRoles = [] }: { children: React.ReactNode, requiredRoles?: string[] }) {
   const { user, loading } = useAuthStore();
 
   if (loading) {
@@ -24,15 +29,21 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" />;
   }
 
+  if (requiredRoles.length > 0 && !requiredRoles.includes(user.role)) {
+    return <Navigate to="/" />;
+  }
+
   return <>{children}</>;
 }
 
 function App() {
   const { loadUser } = useAuthStore();
+  const { loadSettings } = useAppSettingsStore();
 
   useEffect(() => {
     loadUser();
-  }, [loadUser]);
+    loadSettings();
+  }, [loadUser, loadSettings]);
 
   return (
       <BrowserRouter>
@@ -60,10 +71,38 @@ function App() {
               </Layout>
             </PrivateRoute>
           } />
+          <Route path="/settings" element={
+            <PrivateRoute>
+              <Layout>
+                <Settings />
+              </Layout>
+            </PrivateRoute>
+          } />
           <Route path="/messages" element={
             <PrivateRoute>
               <Layout>
                 <Messages />
+              </Layout>
+            </PrivateRoute>
+          } />
+          <Route path="/teams" element={
+            <PrivateRoute>
+              <Layout>
+                <Teams />
+              </Layout>
+            </PrivateRoute>
+          } />
+          <Route path="/statistics" element={
+            <PrivateRoute requiredRoles={['admin', 'manager']}>
+              <Layout>
+                <Statistics />
+              </Layout>
+            </PrivateRoute>
+          } />
+          <Route path="/admin" element={
+            <PrivateRoute requiredRoles={['admin']}>
+              <Layout>
+                <AdminPanel />
               </Layout>
             </PrivateRoute>
           } />

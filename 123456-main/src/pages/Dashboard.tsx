@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { CheckSquare, Clock, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { TaskCard } from '../components/TaskCard';
-import { TaskDetailsModal } from '../components/TaskDetailsModal';
+import { TaskDetailsModal } from '../components/task/TaskDetailsModal.tsx';
 import type { Task } from '../types/database';
 
 export default function Dashboard() {

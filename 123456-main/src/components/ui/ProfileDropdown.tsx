@@ -64,13 +64,23 @@ export default function ProfileDropdown() {
                         Your Profile
                     </Link>
                     <Link
-                        to="/profile"
+                        to="/settings"
                         className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
                         onClick={() => setIsOpen(false)}
                     >
                         <Settings className="mr-2 h-4 w-4" />
                         Settings
                     </Link>
+                    {user?.role === 'admin' && (
+                        <Link
+                            to="/admin"
+                            className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                            onClick={() => setIsOpen(false)}
+                        >
+                            <Settings className="mr-2 h-4 w-4" />
+                            Admin Panel
+                        </Link>
+                    )}
                     <button
                         onClick={() => {
                             signOut();
